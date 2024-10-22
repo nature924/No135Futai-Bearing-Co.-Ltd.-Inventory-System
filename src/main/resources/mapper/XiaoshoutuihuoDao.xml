@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.XiaoshoutuihuoDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.shangpinxiaoshou_id as shangpinxiaoshouId
+        ,a.xiaoshoutuihuo_uuid_number as xiaoshoutuihuoUuidNumber
+        ,a.caozuo_number as caozuoNumber
+        ,a.xiaoshoutuihuo_yuanyou_content as xiaoshoutuihuoYuanyouContent
+        ,a.tuihuan_jine as tuihuanJine
+        ,a.tuihuo_time as tuihuoTime
+        ,a.xiaoshoutuihuo_content as xiaoshoutuihuoContent
+        ,a.insert_time as insertTime
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.XiaoshoutuihuoView" >
+        SELECT
+        <include refid="Base_Column_List" />
+
+--         级联表的字段
+        ,shangpinxiaoshou.xiaoshourenyuan_id as shangpinxiaoshouXiaoshourenyuanId
+        ,shangpinxiaoshou.shangpinxiaoshou_uuid_number as shangpinxiaoshouUuidNumber
+        ,shangpinxiaoshou.shangpinxiaoshou_name as shangpinxiaoshouName
+        ,shangpinxiaoshou.caozuo_number as caozuoNumber
+        ,shangpinxiaoshou.jieqing_types as jieqingTypes
+        ,shangpinxiaoshou.huafei_money as huafeiMoney
+        ,shangpinxiaoshou.xiaoshou_time as xiaoshouTime
+        ,shangpinxiaoshou.shangpinxiaoshou_content as shangpinxiaoshouContent
+
+        FROM xiaoshoutuihuo  a
+        left JOIN shangpinxiaoshou shangpinxiaoshou ON a.shangpinxiaoshou_id = shangpinxiaoshou.id
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test="params.shangpinxiaoshouId != null and params.shangpinxiaoshouId != ''">
+                and (
+                    a.shangpinxiaoshou_id = #{params.shangpinxiaoshouId}
+                )
+            </if>
+            <if test=" params.xiaoshoutuihuoUuidNumber != '' and params.xiaoshoutuihuoUuidNumber != null and params.xiaoshoutuihuoUuidNumber != 'null' ">
+                and a.xiaoshoutuihuo_uuid_number like CONCAT('%',#{params.xiaoshoutuihuoUuidNumber},'%')
+            </if>
+            <if test="params.caozuoNumberStart != null and params.caozuoNumberStart != ''">
+                <![CDATA[  and a.caozuo_number >= #{params.caozuoNumberStart}   ]]>
+            </if>
+            <if test="params.caozuoNumberEnd != null and params.caozuoNumberEnd != ''">
+                <![CDATA[  and a.caozuo_number <= #{params.caozuoNumberEnd}   ]]>
+            </if>
+             <if test="params.caozuoNumber != null and params.caozuoNumber != ''">
+                and a.caozuo_number = #{params.caozuoNumber}
+             </if>
+            <if test=" params.xiaoshoutuihuoYuanyouContent != '' and params.xiaoshoutuihuoYuanyouContent != null and params.xiaoshoutuihuoYuanyouContent != 'null' ">
+                and a.xiaoshoutuihuo_yuanyou_content like CONCAT('%',#{params.xiaoshoutuihuoYuanyouContent},'%')
+            </if>
+            <if test="params.tuihuanJineStart != null ">
+                <![CDATA[  and a.tuihuan_jine >= #{params.tuihuanJineStart}   ]]>
+            </if>
+            <if test="params.tuihuanJineEnd != null ">
+                <![CDATA[  and a.tuihuan_jine <= #{params.tuihuanJineEnd}   ]]>
+            </if>
+            <if test=" params.tuihuoTimeStart != '' and params.tuihuoTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.tuihuo_time) >= UNIX_TIMESTAMP(#{params.tuihuoTimeStart}) ]]>
+            </if>
+            <if test=" params.tuihuoTimeEnd != '' and params.tuihuoTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.tuihuo_time) <= UNIX_TIMESTAMP(#{params.tuihuoTimeEnd}) ]]>
+            </if>
+            <if test=" params.xiaoshoutuihuoContent != '' and params.xiaoshoutuihuoContent != null and params.xiaoshoutuihuoContent != 'null' ">
+                and a.xiaoshoutuihuo_content like CONCAT('%',#{params.xiaoshoutuihuoContent},'%')
+            </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+
+                <!-- 判断商品销售的id不为空 -->
+            <if test=" params.shangpinxiaoshouIdNotNull != '' and params.shangpinxiaoshouIdNotNull != null and params.shangpinxiaoshouIdNotNull != 'null' ">
+                and a.shangpinxiaoshou_id IS NOT NULL
+            </if>
+            <if test="params.shangpinId != null  and params.shangpinId != ''">
+                and shangpinxiaoshou.shangpin_id = #{params.shangpinId}
+            </if>
+            <if test="params.kehuId != null  and params.kehuId != ''">
+                and shangpinxiaoshou.kehu_id = #{params.kehuId}
+            </if>
+            <if test="params.xiaoshourenyuanId != null  and params.xiaoshourenyuanId != ''">
+                and shangpinxiaoshou.xiaoshourenyuan_id = #{params.xiaoshourenyuanId}
+            </if>
+            <if test=" params.shangpinxiaoshouUuidNumber != '' and params.shangpinxiaoshouUuidNumber != null and params.shangpinxiaoshouUuidNumber != 'null' ">
+                and shangpinxiaoshou.shangpinxiaoshou_uuid_number like CONCAT('%',#{params.shangpinxiaoshouUuidNumber},'%')
+            </if>
+            <if test=" params.shangpinxiaoshouName != '' and params.shangpinxiaoshouName != null and params.shangpinxiaoshouName != 'null' ">
+                and shangpinxiaoshou.shangpinxiaoshou_name like CONCAT('%',#{params.shangpinxiaoshouName},'%')
+            </if>
+            <if test="params.caozuoNumberStart != null  and params.caozuoNumberStart != '' ">
+                <![CDATA[  and shangpinxiaoshou.caozuo_number >= #{params.caozuoNumberStart}   ]]>
+            </if>
+            <if test="params.caozuoNumberEnd != null  and params.caozuoNumberEnd != '' ">
+                <![CDATA[  and shangpinxiaoshou.caozuo_number <= #{params.caozuoNumberEnd}   ]]>
+            </if>
+            <if test="params.caozuoNumber != null  and params.caozuoNumber != '' ">
+                and shangpinxiaoshou.caozuo_number = #{params.caozuoNumber}
+            </if>
+            <if test="params.jieqingTypes != null  and params.jieqingTypes != ''">
+                and shangpinxiaoshou.jieqing_types = #{params.jieqingTypes}
+            </if>
+
+            <if test="params.huafeiMoneyStart != null ">
+                <![CDATA[  and shangpinxiaoshou.huafei_money >= #{params.huafeiMoneyStart}   ]]>
+            </if>
+            <if test="params.huafeiMoneyEnd != null ">
+                <![CDATA[  and shangpinxiaoshou.huafei_money <= #{params.huafeiMoneyEnd}   ]]>
+            </if>
+            <if test=" params.xiaoshouTimeStart != '' and params.xiaoshouTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(shangpinxiaoshou.xiaoshou_time) >= UNIX_TIMESTAMP(#{params.xiaoshouTimeStart}) ]]>
+            </if>
+            <if test=" params.xiaoshouTimeEnd != '' and params.xiaoshouTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(shangpinxiaoshou.xiaoshou_time) <= UNIX_TIMESTAMP(#{params.xiaoshouTimeEnd}) ]]>
+            </if>
+            <if test=" params.shangpinxiaoshouContent != '' and params.shangpinxiaoshouContent != null and params.shangpinxiaoshouContent != 'null' ">
+                and shangpinxiaoshou.shangpinxiaoshou_content like CONCAT('%',#{params.shangpinxiaoshouContent},'%')
+            </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(shangpinxiaoshou.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(shangpinxiaoshou.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+        </where>
+        order by a.${params.sort} ${params.order}
+    </select>
+
+</mapper>

@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.ShangpinxiaoshouDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.shangpin_id as shangpinId
+        ,a.kehu_id as kehuId
+        ,a.xiaoshourenyuan_id as xiaoshourenyuanId
+        ,a.shangpinxiaoshou_uuid_number as shangpinxiaoshouUuidNumber
+        ,a.shangpinxiaoshou_name as shangpinxiaoshouName
+        ,a.caozuo_number as caozuoNumber
+        ,a.jieqing_types as jieqingTypes
+        ,a.huafei_money as huafeiMoney
+        ,a.xiaoshou_time as xiaoshouTime
+        ,a.shangpinxiaoshou_content as shangpinxiaoshouContent
+        ,a.insert_time as insertTime
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.ShangpinxiaoshouView" >
+        SELECT
+        <include refid="Base_Column_List" />
+
+--         级联表的字段
+        ,kehu.xiaoshourenyuan_id as kehuXiaoshourenyuanId
+        ,kehu.kehu_uuid_number as kehuUuidNumber
+        ,kehu.kehu_name as kehuName
+        ,kehu.kehu_phone as kehuPhone
+        ,kehu.kehu_id_number as kehuIdNumber
+        ,kehu.kehu_photo as kehuPhoto
+        ,kehu.kehu_zhuzhi as kehuZhuzhi
+        ,kehu.laiyuan_types as laiyuanTypes
+        ,kehu.sex_types as sexTypes
+        ,kehu.age as age
+        ,kehu.kehu_email as kehuEmail
+        ,kehu.kehu_content as kehuContent
+        ,shangpin.shangpin_uuid_number as shangpinUuidNumber
+        ,shangpin.shangpin_name as shangpinName
+        ,shangpin.shangpin_photo as shangpinPhoto
+        ,shangpin.shangpin_danwei as shangpinDanwei
+        ,shangpin.shangpin_types as shangpinTypes
+        ,shangpin.shangpin_kucun_number as shangpinKucunNumber
+        ,shangpin.shangpin_new_money as shangpinNewMoney
+        ,shangpin.shangpin_old_money as shangpinOldMoney
+        ,shangpin.cangku_types as cangkuTypes
+        ,shangpin.daoqi_time as daoqiTime
+        ,shangpin.shangpin_content as shangpinContent
+        ,xiaoshourenyuan.xiaoshourenyuan_name as xiaoshourenyuanName
+        ,xiaoshourenyuan.xiaoshourenyuan_phone as xiaoshourenyuanPhone
+        ,xiaoshourenyuan.xiaoshourenyuan_id_number as xiaoshourenyuanIdNumber
+        ,xiaoshourenyuan.xiaoshourenyuan_photo as xiaoshourenyuanPhoto
+        ,xiaoshourenyuan.xiaoshourenyuan_zhuzhi as xiaoshourenyuanZhuzhi
+        ,xiaoshourenyuan.xiaoshourenyuan_email as xiaoshourenyuanEmail
+
+        FROM shangpinxiaoshou  a
+        left JOIN kehu kehu ON a.kehu_id = kehu.id
+        left JOIN shangpin shangpin ON a.shangpin_id = shangpin.id
+        left JOIN xiaoshourenyuan xiaoshourenyuan ON a.xiaoshourenyuan_id = xiaoshourenyuan.id
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test="params.shangpinId != null and params.shangpinId != ''">
+                and (
+                    a.shangpin_id = #{params.shangpinId}
+                )
+            </if>
+            <if test="params.kehuId != null and params.kehuId != ''">
+                and (
+                    a.kehu_id = #{params.kehuId}
+                )
+            </if>
+            <if test="params.xiaoshourenyuanId != null and params.xiaoshourenyuanId != ''">
+                and (
+                    a.xiaoshourenyuan_id = #{params.xiaoshourenyuanId}
+                    or kehu.xiaoshourenyuan_id = #{params.xiaoshourenyuanId}
+                )
+            </if>
+            <if test=" params.shangpinxiaoshouUuidNumber != '' and params.shangpinxiaoshouUuidNumber != null and params.shangpinxiaoshouUuidNumber != 'null' ">
+                and a.shangpinxiaoshou_uuid_number like CONCAT('%',#{params.shangpinxiaoshouUuidNumber},'%')
+            </if>
+            <if test=" params.shangpinxiaoshouName != '' and params.shangpinxiaoshouName != null and params.shangpinxiaoshouName != 'null' ">
+                and a.shangpinxiaoshou_name like CONCAT('%',#{params.shangpinxiaoshouName},'%')
+            </if>
+            <if test="params.caozuoNumberStart != null and params.caozuoNumberStart != ''">
+                <![CDATA[  and a.caozuo_number >= #{params.caozuoNumberStart}   ]]>
+            </if>
+            <if test="params.caozuoNumberEnd != null and params.caozuoNumberEnd != ''">
+                <![CDATA[  and a.caozuo_number <= #{params.caozuoNumberEnd}   ]]>
+            </if>
+             <if test="params.caozuoNumber != null and params.caozuoNumber != ''">
+                and a.caozuo_number = #{params.caozuoNumber}
+             </if>
+            <if test="params.jieqingTypes != null and params.jieqingTypes != ''">
+                and a.jieqing_types = #{params.jieqingTypes}
+            </if>
+            <if test="params.huafeiMoneyStart != null ">
+                <![CDATA[  and a.huafei_money >= #{params.huafeiMoneyStart}   ]]>
+            </if>
+            <if test="params.huafeiMoneyEnd != null ">
+                <![CDATA[  and a.huafei_money <= #{params.huafeiMoneyEnd}   ]]>
+            </if>
+            <if test=" params.xiaoshouTimeStart != '' and params.xiaoshouTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.xiaoshou_time) >= UNIX_TIMESTAMP(#{params.xiaoshouTimeStart}) ]]>
+            </if>
+            <if test=" params.xiaoshouTimeEnd != '' and params.xiaoshouTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.xiaoshou_time) <= UNIX_TIMESTAMP(#{params.xiaoshouTimeEnd}) ]]>
+            </if>
+            <if test=" params.shangpinxiaoshouContent != '' and params.shangpinxiaoshouContent != null and params.shangpinxiaoshouContent != 'null' ">
+                and a.shangpinxiaoshou_content like CONCAT('%',#{params.shangpinxiaoshouContent},'%')
+            </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+
+                <!-- 判断客户的id不为空 -->
+            <if test=" params.kehuIdNotNull != '' and params.kehuIdNotNull != null and params.kehuIdNotNull != 'null' ">
+                and a.kehu_id IS NOT NULL
+            </if>
+            <if test=" params.kehuUuidNumber != '' and params.kehuUuidNumber != null and params.kehuUuidNumber != 'null' ">
+                and kehu.kehu_uuid_number like CONCAT('%',#{params.kehuUuidNumber},'%')
+            </if>
+            <if test=" params.kehuName != '' and params.kehuName != null and params.kehuName != 'null' ">
+                and kehu.kehu_name like CONCAT('%',#{params.kehuName},'%')
+            </if>
+            <if test=" params.kehuPhone != '' and params.kehuPhone != null and params.kehuPhone != 'null' ">
+                and kehu.kehu_phone like CONCAT('%',#{params.kehuPhone},'%')
+            </if>
+            <if test=" params.kehuIdNumber != '' and params.kehuIdNumber != null and params.kehuIdNumber != 'null' ">
+                and kehu.kehu_id_number like CONCAT('%',#{params.kehuIdNumber},'%')
+            </if>
+            <if test=" params.kehuZhuzhi != '' and params.kehuZhuzhi != null and params.kehuZhuzhi != 'null' ">
+                and kehu.kehu_zhuzhi like CONCAT('%',#{params.kehuZhuzhi},'%')
+            </if>
+            <if test="params.laiyuanTypes != null  and params.laiyuanTypes != ''">
+                and kehu.laiyuan_types = #{params.laiyuanTypes}
+            </if>
+
+            <if test="params.sexTypes != null  and params.sexTypes != ''">
+                and kehu.sex_types = #{params.sexTypes}
+            </if>
+
+            <if test="params.ageStart != null  and params.ageStart != '' ">
+                <![CDATA[  and kehu.age >= #{params.ageStart}   ]]>
+            </if>
+            <if test="params.ageEnd != null  and params.ageEnd != '' ">
+                <![CDATA[  and kehu.age <= #{params.ageEnd}   ]]>
+            </if>
+            <if test="params.age != null  and params.age != '' ">
+                and kehu.age = #{params.age}
+            </if>
+            <if test=" params.kehuEmail != '' and params.kehuEmail != null and params.kehuEmail != 'null' ">
+                and kehu.kehu_email like CONCAT('%',#{params.kehuEmail},'%')
+            </if>
+            <if test=" params.kehuContent != '' and params.kehuContent != null and params.kehuContent != 'null' ">
+                and kehu.kehu_content like CONCAT('%',#{params.kehuContent},'%')
+            </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(kehu.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(kehu.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+                <!-- 判断商品的id不为空 -->
+            <if test=" params.shangpinIdNotNull != '' and params.shangpinIdNotNull != null and params.shangpinIdNotNull != 'null' ">
+                and a.shangpin_id IS NOT NULL
+            </if>
+            <if test="params.gongyingshangId != null  and params.gongyingshangId != ''">
+                and shangpin.gongyingshang_id = #{params.gongyingshangId}
+            </if>
+            <if test=" params.shangpinUuidNumber != '' and params.shangpinUuidNumber != null and params.shangpinUuidNumber != 'null' ">
+                and shangpin.shangpin_uuid_number like CONCAT('%',#{params.shangpinUuidNumber},'%')
+            </if>
+            <if test=" params.shangpinName != '' and params.shangpinName != null and params.shangpinName != 'null' ">
+                and shangpin.shangpin_name like CONCAT('%',#{params.shangpinName},'%')
+            </if>
+            <if test=" params.shangpinDanwei != '' and params.shangpinDanwei != null and params.shangpinDanwei != 'null' ">
+                and shangpin.shangpin_danwei like CONCAT('%',#{params.shangpinDanwei},'%')
+            </if>
+            <if test="params.shangpinTypes != null  and params.shangpinTypes != ''">
+                and shangpin.shangpin_types = #{params.shangpinTypes}
+            </if>
+
+            <if test="params.shangpinKucunNumberStart != null  and params.shangpinKucunNumberStart != '' ">
+                <![CDATA[  and shangpin.shangpin_kucun_number >= #{params.shangpinKucunNumberStart}   ]]>
+            </if>
+            <if test="params.shangpinKucunNumberEnd != null  and params.shangpinKucunNumberEnd != '' ">
+                <![CDATA[  and shangpin.shangpin_kucun_number <= #{params.shangpinKucunNumberEnd}   ]]>
+            </if>
+            <if test="params.shangpinKucunNumber != null  and params.shangpinKucunNumber != '' ">
+                and shangpin.shangpin_kucun_number = #{params.shangpinKucunNumber}
+            </if>
+            <if test="params.shangpinNewMoneyStart != null ">
+                <![CDATA[  and shangpin.shangpin_new_money >= #{params.shangpinNewMoneyStart}   ]]>
+            </if>
+            <if test="params.shangpinNewMoneyEnd != null ">
+                <![CDATA[  and shangpin.shangpin_new_money <= #{params.shangpinNewMoneyEnd}   ]]>
+            </if>
+            <if test="params.shangpinOldMoneyStart != null ">
+                <![CDATA[  and shangpin.shangpin_old_money >= #{params.shangpinOldMoneyStart}   ]]>
+            </if>
+            <if test="params.shangpinOldMoneyEnd != null ">
+                <![CDATA[  and shangpin.shangpin_old_money <= #{params.shangpinOldMoneyEnd}   ]]>
+            </if>
+            <if test="params.cangkuTypes != null  and params.cangkuTypes != ''">
+                and shangpin.cangku_types = #{params.cangkuTypes}
+            </if>
+
+            <if test=" params.daoqiTimeStart != '' and params.daoqiTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(shangpin.daoqi_time) >= UNIX_TIMESTAMP(#{params.daoqiTimeStart}) ]]>
+            </if>
+            <if test=" params.daoqiTimeEnd != '' and params.daoqiTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(shangpin.daoqi_time) <= UNIX_TIMESTAMP(#{params.daoqiTimeEnd}) ]]>
+            </if>
+            <if test=" params.shangpinContent != '' and params.shangpinContent != null and params.shangpinContent != 'null' ">
+                and shangpin.shangpin_content like CONCAT('%',#{params.shangpinContent},'%')
+            </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(shangpin.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(shangpin.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+                <!-- 判断销售人员的id不为空 -->
+            <if test=" params.xiaoshourenyuanIdNotNull != '' and params.xiaoshourenyuanIdNotNull != null and params.xiaoshourenyuanIdNotNull != 'null' ">
+                and a.xiaoshourenyuan_id IS NOT NULL
+            </if>
+            <if test=" params.xiaoshourenyuanName != '' and params.xiaoshourenyuanName != null and params.xiaoshourenyuanName != 'null' ">
+                and xiaoshourenyuan.xiaoshourenyuan_name like CONCAT('%',#{params.xiaoshourenyuanName},'%')
+            </if>
+            <if test=" params.xiaoshourenyuanPhone != '' and params.xiaoshourenyuanPhone != null and params.xiaoshourenyuanPhone != 'null' ">
+                and xiaoshourenyuan.xiaoshourenyuan_phone like CONCAT('%',#{params.xiaoshourenyuanPhone},'%')
+            </if>
+            <if test=" params.xiaoshourenyuanIdNumber != '' and params.xiaoshourenyuanIdNumber != null and params.xiaoshourenyuanIdNumber != 'null' ">
+                and xiaoshourenyuan.xiaoshourenyuan_id_number like CONCAT('%',#{params.xiaoshourenyuanIdNumber},'%')
+            </if>
+            <if test=" params.xiaoshourenyuanZhuzhi != '' and params.xiaoshourenyuanZhuzhi != null and params.xiaoshourenyuanZhuzhi != 'null' ">
+                and xiaoshourenyuan.xiaoshourenyuan_zhuzhi like CONCAT('%',#{params.xiaoshourenyuanZhuzhi},'%')
+            </if>
+            <if test=" params.xiaoshourenyuanEmail != '' and params.xiaoshourenyuanEmail != null and params.xiaoshourenyuanEmail != 'null' ">
+                and xiaoshourenyuan.xiaoshourenyuan_email like CONCAT('%',#{params.xiaoshourenyuanEmail},'%')
+            </if>
+        </where>
+        order by a.${params.sort} ${params.order}
+    </select>
+
+</mapper>
